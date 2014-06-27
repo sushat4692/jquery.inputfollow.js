@@ -16,8 +16,6 @@
         'inputfollow': {
             'index': 0,
             'collection': [],
-            'IS_VALID': true,
-            'IS_LIMIT': false,
             'rules': {
                 'required': IS_VALID,
                 'email':    IS_VALID,
@@ -93,16 +91,18 @@
                     if( val !== org ) {
                         target.val( val );
                         if( target.is( ':focus' ) ) {
-                            var move = val.length - target.data( 'before_val' ).length;
+                            var pos = val.length - target.data( 'before_val' ).length + target.data( 'caret_pos' );
 
                             if ( document.selection !== U ) {
-                                /* TODO : Follow TextRange
-                                var range = target.data( 'caret_pos' );
-                                range.move( 'character', elm.value.length );
+                                var range = target.get(0).createTextRange();
+                                range.move( 'character', pos );
                                 range.select();
-                                */
                             } else {
-                                target.get(0).setSelectionRange( target.data( 'caret_pos' )+move, target.data( 'caret_pos' )+move );
+                                try {
+                                    target.get(0).setSelectionRange( pos, pos );
+                                } catch( e ) {
+                                    // Chrome...
+                                }
                             }
                         }
                     }
@@ -111,9 +111,23 @@
             },
             '_get_caret_pos': function( target ) {
                 if ( document.selection !== U ) {
-                    return document.selection.createRange();
+                    var range = document.selection.createRange(),
+                        tmp   = document.body.createTextRange();
+                    try {
+                        tmp.moveToElementText(target);
+                        tmp.setEndPoint('StartToStart', range);
+                    } catch (e) {
+                        tmp = target.createTextRange();
+                        tmp.setEndPoint('StartToStart', range);
+                    }
+
+                    return target.value.length - tmp.text.length;
                 } else {
-                    return target.selectionStart;
+                    try {
+                        return target.selectionStart;
+                    } catch( e ) {
+                        return 0;
+                    }
                 }
             }
         }
