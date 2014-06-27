@@ -1,0 +1,30 @@
+body {
+  font: 16px/1.6 sans-serif; }
+
+.caution {
+  color: #a94442; }
+
+.container {
+  width: 700px;
+  margin: 0 auto;
+  padding: 40px 0; }
+
+dl dd {
+  margin: 0 0 10px 0; }
+
+form input,
+form textarea {
+  box-sizing: border-box;
+  padding: 10px;
+  outline: none;
+  font-size: 1rem;
+  border: 2px solid #999; }
+  form input.full,
+  form textarea.full {
+    width: 100%; }
+  form input.error,
+  form textarea.error {
+    border-color: #a94442; }
+  form input.valid,
+  form textarea.valid {
+    border-color: #3c763d; }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jquery.inputfollow.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="test/test.css">
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="src/jquery.inputfollow.js"></script>
+    <script src="test/test.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>jquery.inputfollow.js</h1>
+
+        <form role="form" action="" method="get">
+            <dl>
+                <dt>Name <span class="caution">*</span></dt>
+                    <dd><input type="text" name="name" class="full" placeholder="Enter Name"></dd>
+                <dt>E-mail <span class="caution">*</span></dt>
+                    <dd><input type="email" name="email" class="full" placeholder="Enter E-mail"></dd>
+                <dt>Input Number</dt>
+                    <dd><input type="text" name="number" class="full" placeholder="Enter Number ( Limit Number )"></dd>
+                <dt>Textarea Required</dt>
+                    <dd><textarea name="textarea" rows="3" class="full"></textarea></dd>
+                <dt>Other Input</dt>
+                    <dd><input type="text" name="other" class="full" placeholder=""></dd>
+            </dl>
+
+            <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+
+    </div>
+
+</body>
+</html>
