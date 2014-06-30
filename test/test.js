@@ -5,7 +5,7 @@
             'rules': {
                 'name'     : 'required',
                 'email'    : ['required', 'email'],
-                'textarea' : ['number', 'required'],
+                'textarea' : 'required',
                 'number'   : 'number'
             }
         } );
