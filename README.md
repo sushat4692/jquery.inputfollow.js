@@ -10,3 +10,7 @@ Input Validate, Input Limit etc.
 ## Limit
 
 * Number
+
+## Demo
+
+[Hear](https://sus-happy.github.io/jquery.inputfollow.js/)
