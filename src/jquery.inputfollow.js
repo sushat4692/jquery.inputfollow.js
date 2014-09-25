@@ -19,7 +19,8 @@
             'rules': {
                 'required': IS_VALID,
                 'email':    IS_VALID,
-                'number':   IS_LIMIT
+                'number':   IS_LIMIT,
+                'code':     IS_LIMIT
             },
             'model': function( wrap ) {
                 this.wrap   = wrap;
@@ -60,6 +61,9 @@
                     case 'number':
                         return $.inputfollow._check_method._number( target );
                         break;
+                    case 'code':
+                        return $.inputfollow._check_method._code( target );
+                        break;
                 }
 
                 return true;
@@ -88,6 +92,36 @@
                     } );
                     // 数字以外を削除
                     val = val.replace( /[^0-9]/g, '' );
+                    if( val !== org ) {
+                        target.val( val );
+                        if( target.is( ':focus' ) ) {
+                            var pos = val.length - target.data( 'before_val' ).length + target.data( 'caret_pos' );
+
+                            if ( document.selection !== U ) {
+                                var range = target.get(0).createTextRange();
+                                range.move( 'character', pos );
+                                range.select();
+                            } else {
+                                try {
+                                    target.get(0).setSelectionRange( pos, pos );
+                                } catch( e ) {
+                                    // Chrome...
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                },
+                '_code': function( target ) {
+                    var val = target.val();
+                    var org = val;
+                    // 全角 -> 半角
+                    val = val.replace( /[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+                        return String.fromCharCode( s.charCodeAt(0) - 0xFEE0 );
+                    } );
+                    val = val.replace( /[−ーー―]/g, '-' );
+                    // 数字以外を削除
+                    val = val.replace( /[^0-9_-]/g, '' );
                     if( val !== org ) {
                         target.val( val );
                         if( target.is( ':focus' ) ) {
