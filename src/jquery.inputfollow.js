@@ -1,7 +1,7 @@
 /**
  * jquery.inputfollow.js
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @author SUSH <sush@sus-happy.ner>
  * https://github.com/sus-happy/jquery.inputfollow.js
  */
@@ -23,14 +23,16 @@
                 'code':     IS_LIMIT
             },
             'model': function( wrap ) {
-                this.wrap   = wrap;
-                this.length = 0;
-                this.errors = 0;
-                this.rules  = {};
-                this.target = {};
+                this.wrap     = wrap;
+                this.length   = 0;
+                this.errors   = 0;
+                this.rules    = {};
+                this.target   = {};
+                this.messages = {};
             },
-            'method': function( target ) {
+            'method': function( target, index ) {
                 var that         = this;
+                this.index       = index;
                 this.model       = new $.inputfollow.model( target );
                 this.error_class = 'error';
                 this.valid_class = 'valid';
@@ -40,33 +42,29 @@
 
                 target.submit( function() {
                     if ( that.model.errors <= 0 ) {
-                        if( typeof that.on_success === 'function' )
+                        if( $.isFunction( that.on_success ) )
                             that.on_success();
                         return true;
                     } else {
-                        if( typeof that.on_error === 'function' )
+                        if( $.isFunction( that.on_error ) )
                             that.on_error();
                         return false;
                     }
                 } );
             },
-            '_check_handler': function( mode, target ) {
-                switch( mode ) {
-                    case 'required':
-                        return $.inputfollow._check_method._required( target );
-                        break;
-                    case 'email':
-                        return $.inputfollow._check_method._email( target );
-                        break;
-                    case 'number':
-                        return $.inputfollow._check_method._number( target );
-                        break;
-                    case 'code':
-                        return $.inputfollow._check_method._code( target );
-                        break;
+            '_check_rules': function( rule ) {
+                if( $.inputfollow.rules[ rule ] ) {
+                    return $.inputfollow.rules[ rule ];
                 }
 
-                return true;
+                var match;
+                if( match = rule.match( /^(.*?)_(or|and)_.*$/i ) ) {
+                    if( $.inputfollow.rules[ match[1] ] ) {
+                        return $.inputfollow.rules[ match[1] ];
+                    }
+                }
+
+                return -1;
             },
             '_check_method': {
                 '_required': function( target ) {
@@ -175,7 +173,27 @@
 
             for( key in this.rules ) {
                 this.target[ key ] = this.wrap.find( 'input,select,textarea' ).filter( '[name="'+key+'"]' ).data( 'is_inputfollow', true );
+
+
+                var match;
+                if( $.isArray( this.rules[ key ] ) ) {
+                    for( var i=0, l=this.rules[ key ].length; i<l; i++ ) {
+                        $.each( this.rules[ key ][i].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
+                            that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true );
+                        } );
+                    }
+                } else {
+                    $.each( this.rules[ key ].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
+                        that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true );
+                    } );
+                }
             }
+        },
+        'set_messages': function( messages ) {
+            var that = this;
+            $.each( messages, function( key ) {
+                that.messages[ key ] = messages[ key ];
+            } );
         }
     };
     $.inputfollow.method.prototype = {
@@ -184,6 +202,8 @@
 
             if( param.rules )
                 this.set_rules( param.rules );
+            if( param.messages )
+                this.set_messages( param.messages );
             if( param.valid_class )
                 this.set_valid_class( param.valid_class );
             if( param.on_validate )
@@ -195,19 +215,22 @@
         'set_rules': function( rules ) {
             this.model.set_rules( rules );
         },
+        'set_messages': function( messages ) {
+            this.model.set_messages( messages );
+        },
         'set_valid_class': function( valid_class ) {
             this.valid_class = valid_class;
         },
         'set_on_validate': function( func ) {
-            if( typeof func === 'function' )
+            if( $.isFunction( func ) )
                 this.on_validate = func;
         },
         'set_on_success': function( func ) {
-            if( typeof func === 'function' )
+            if( $.isFunction( func ) )
                 this.on_success = func;
         },
         'set_on_error': function( func ) {
-            if( typeof func === 'function' )
+            if( $.isFunction( func ) )
                 this.on_error = func;
         },
         'set_event': function() {
@@ -241,29 +264,50 @@
 
             this.model.errors = 0;
             $.each( this.model.target, function( key ) {
-                var target = that.model.target[ key ];
                 var rules  = that.model.rules[ key ];
+                if(! rules ) {
+                    return;
+                }
+
+                var target = that.model.target[ key ];
                 var flag   = true;
                 var check  = false;
+                var error  = null;
+                var err_id = 'inputfollow-error-'+that.index+'-'+key.replace( '[]', '' );
 
                 if( target.length ) {
                     if( $.isArray( rules ) ) {
                         $.each( rules, function( k ) {
-                            check = check || $.inputfollow.rules[ rules[k] ] ? true : false;
-                            flag  = flag  && $.inputfollow._check_handler( rules[k], target ) ? true : false;
+                            check = check || $.inputfollow.rules[ rules[k] ] ? IS_VALID : IS_LIMIT;
+                            if(! that.check_handler( rules[k], target ) ) {
+                                flag = false;
+                                if( error === null && that.model.messages[ key ] && that.model.messages[ key ][ rules[k] ] ) {
+                                    error = that.model.messages[ key ][ rules[k] ];
+                                }
+                            }
                         } );
                     } else {
-                        check = $.inputfollow.rules[ rules ];
-                        flag  = $.inputfollow._check_handler( rules, target );
+                        check = $.inputfollow._check_rules( rules );
+                        flag  = that.check_handler( rules, target );
+                        if( that.model.messages[ key ] && that.model.messages[ key ][ rules ] ) {
+                            error = that.model.messages[ key ][ rules ];
+                        }
                     }
                 }
 
-                if( check ) {
+                if( check === IS_VALID ) {
                     if( flag ) {
                         target.addClass( that.valid_class ).removeClass( that.error_class );
+                        // エラーメッセージ削除
+                        $( '#'+err_id ).remove();
                     } else {
                         that.model.errors ++;
                         target.removeClass( that.valid_class ).addClass( that.error_class );
+                        // エラーメッセージ表示
+                        $( '#'+err_id ).remove();
+                        if( error !== null ) {
+                            target.eq( 0 ).after( $( '<span>', { 'id': err_id, 'class': 'inputfollow-error' } ).text( error ) );
+                        }
                     }
                 }
 
@@ -274,6 +318,45 @@
         },
         'get_errors': function() {
             return this.model.errors;
+        },
+        'check_handler': function( mode, target ) {
+            var handler = $.inputfollow._check_method[ '_'+mode ];
+            if( $.isFunction( handler ) ) {
+                return handler( target );
+            } else {
+                var match;
+                var sub = null;
+
+
+
+                if( match = mode.match( /^(.*?)_or_.*$/i ) ) {
+                    handler = $.inputfollow._check_method[ '_'+match[1] ];
+                    if( $.isFunction( handler ) ) {
+                        var flag = handler( target );
+
+                        var sub_targets = mode.split( '_or_' ).slice( 1 );
+                        for( var i=0, l=sub_targets.length; i<l; i++ ) {
+                            flag = flag || handler( this.model.target[ sub_targets[i] ] );
+                        }
+
+                        return flag;
+                    }
+                } else if( match = mode.match( /^(.*?)_and_(.*)$/i ) ) {
+                    handler = $.inputfollow._check_method[ '_'+match[1] ];
+                    if( $.isFunction( handler ) ) {
+                        var flag = handler( target );
+
+                        var sub_targets = mode.split( '_and_' ).slice( 1 );
+                        for( var i=0, l=sub_targets.length; i<l; i++ ) {
+                            flag = flag && handler( this.model.target[ sub_targets[i] ] );
+                        }
+
+                        return flag;
+                    }
+                }
+            }
+
+            return true;
         }
     };
 
@@ -288,7 +371,7 @@
                 $(this).data( 'inputfollow_id', index );
                 $.inputfollow.index ++;
 
-                method = new $.inputfollow.method( $(this) );
+                method = new $.inputfollow.method( $(this), index );
 
                 $.inputfollow.collection[ index ] = method;
             } else {

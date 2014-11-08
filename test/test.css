@@ -1,7 +1,8 @@
 body {
   font: 16px/1.6 sans-serif; }
 
-.caution {
+.caution,
+.inputfollow-error {
   color: #a94442; }
 
 .container {
