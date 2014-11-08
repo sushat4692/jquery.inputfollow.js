@@ -10,6 +10,22 @@ Input Validate, Input Limit etc.
 ## Limit
 
 * Number
+* Code
+
+## Usage
+
+```
+$( 'form' ).inputfollow( {
+    rules: {
+        foo: 'required',
+        bar: [ 'required', 'email' ],
+        baz: 'required_or_qux'
+    },
+    messages: {
+        name: { required: 'Error Messages' }
+    }
+} );
+```
 
 ## Demo
 
