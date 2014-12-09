@@ -1,7 +1,7 @@
 /**
  * jquery.inputfollow.js
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @author SUSH <sush@sus-happy.ner>
  * https://github.com/sus-happy/jquery.inputfollow.js
  */
@@ -23,12 +23,13 @@
                 'code':     IS_LIMIT
             },
             'model': function( wrap ) {
-                this.wrap     = wrap;
-                this.length   = 0;
-                this.errors   = 0;
-                this.rules    = {};
-                this.target   = {};
-                this.messages = {};
+                this.wrap      = wrap;
+                this.length    = 0;
+                this.errors    = 0;
+                this.error_mes = 0;
+                this.rules     = {};
+                this.target    = {};
+                this.messages  = {};
             },
             'method': function( target, index ) {
                 var that         = this;
@@ -47,7 +48,7 @@
                         return true;
                     } else {
                         if( $.isFunction( that.on_error ) )
-                            that.on_error();
+                            that.on_error( that.model.error_mes );
                         return false;
                     }
                 } );
@@ -172,19 +173,38 @@
             } );
 
             for( key in this.rules ) {
-                this.target[ key ] = this.wrap.find( 'input,select,textarea' ).filter( '[name="'+key+'"]' ).data( 'is_inputfollow', true );
-
+                this.target[ key ] = this.wrap.find( 'input,select,textarea' ).filter( '[name="'+key+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).unbind( 'focus.inputfollow_focus' ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
 
                 var match;
                 if( $.isArray( this.rules[ key ] ) ) {
                     for( var i=0, l=this.rules[ key ].length; i<l; i++ ) {
                         $.each( this.rules[ key ][i].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
-                            that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true );
+                            that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).unbind( 'focus.inputfollow_focus' ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
                         } );
                     }
                 } else {
                     $.each( this.rules[ key ].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
-                        that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true );
+                        that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).unbind( 'focus.inputfollow_focus' ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
+                    } );
+                }
+            }
+        },
+        'reset_rules': function() {
+            this.wrap.find( 'input,select,textarea' ).unbind( 'focus.inputfollow_focus' );
+
+            for( key in this.rules ) {
+                this.target[ key ] = this.wrap.find( 'input,select,textarea' ).filter( '[name="'+key+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
+
+                var match;
+                if( $.isArray( this.rules[ key ] ) ) {
+                    for( var i=0, l=this.rules[ key ].length; i<l; i++ ) {
+                        $.each( this.rules[ key ][i].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
+                            that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
+                        } );
+                    }
+                } else {
+                    $.each( this.rules[ key ].split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 ), function( key, val ) {
+                        that.target[ val ] = that.wrap.find( 'input,select,textarea' ).filter( '[name="'+val+'"]' ).data( 'is_inputfollow', true ).data( 'is_focused', false ).bind( 'focus.inputfollow_focus', this.enable_focus_flag );
                     } );
                 }
             }
@@ -194,6 +214,9 @@
             $.each( messages, function( key ) {
                 that.messages[ key ] = messages[ key ];
             } );
+        },
+        'enable_focus_flag': function() {
+            $(this).data( 'is_focused', true );
         }
     };
     $.inputfollow.method.prototype = {
@@ -262,7 +285,8 @@
         'validate_all': function() {
             var that = this;
 
-            this.model.errors = 0;
+            this.model.errors    = 0;
+            this.model.error_mes = '';
             $.each( this.model.target, function( key ) {
                 var rules  = that.model.rules[ key ];
                 if(! rules ) {
@@ -278,18 +302,26 @@
                 if( target.length ) {
                     if( $.isArray( rules ) ) {
                         $.each( rules, function( k ) {
-                            check = check || $.inputfollow.rules[ rules[k] ] ? IS_VALID : IS_LIMIT;
+                            check = check || $.inputfollow._check_rules( rules[k] ) ? IS_VALID : IS_LIMIT;
                             if(! that.check_handler( rules[k], target ) ) {
                                 flag = false;
-                                if( error === null && that.model.messages[ key ] && that.model.messages[ key ][ rules[k] ] ) {
-                                    error = that.model.messages[ key ][ rules[k] ];
+                                if( error === null ) {
+                                    if(
+                                        Object.prototype.hasOwnProperty.call( that.model.messages, key ) &&
+                                        Object.prototype.hasOwnProperty.call( that.model.messages[ key ], rules[k] )
+                                    ) {
+                                        error = that.model.messages[ key ][ rules[k] ];
+                                    }
                                 }
                             }
                         } );
                     } else {
                         check = $.inputfollow._check_rules( rules );
                         flag  = that.check_handler( rules, target );
-                        if( that.model.messages[ key ] && that.model.messages[ key ][ rules ] ) {
+                        if(
+                            Object.prototype.hasOwnProperty.call( that.model.messages, key ) &&
+                            Object.prototype.hasOwnProperty.call( that.model.messages[ key ], rules )
+                        ) {
                             error = that.model.messages[ key ][ rules ];
                         }
                     }
@@ -306,7 +338,10 @@
                         // エラーメッセージ表示
                         $( '#'+err_id ).remove();
                         if( error !== null ) {
-                            target.eq( 0 ).after( $( '<span>', { 'id': err_id, 'class': 'inputfollow-error' } ).text( error ) );
+                            that.model.error_mes += '\n'+error;
+                            if( target.data( 'is_focused' ) ) {
+                                target.eq( 0 ).after( $( '<span>', { 'id': err_id, 'class': 'inputfollow-error' } ).text( error ) );
+                            }
                         }
                     }
                 }
@@ -357,6 +392,11 @@
             }
 
             return true;
+        },
+        'reset': function() {
+            this.model.reset_rules();
+            this.set_event();
+            this.validate_all();
         }
     };
 
