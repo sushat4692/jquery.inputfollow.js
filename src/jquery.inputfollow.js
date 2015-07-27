@@ -1,7 +1,7 @@
 /**
  * jquery.inputfollow.js
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @author SUSH <sush@sus-happy.ner>
  * https://github.com/sus-happy/jquery.inputfollow.js
  */
@@ -37,6 +37,7 @@
                 this.model       = new $.inputfollow.model( target );
                 this.error_class = 'error';
                 this.valid_class = 'valid';
+                this.initial_error_view = false;
                 this.on_validate = function() {};
                 this.on_success  = function() {};
                 this.on_error    = function() {};
@@ -227,10 +228,18 @@
                 this.set_rules( param.rules );
             if( param.messages )
                 this.set_messages( param.messages );
+            if( param.error_class )
+                this.set_error_class( param.error_class );
             if( param.valid_class )
                 this.set_valid_class( param.valid_class );
+            if( param.initial_error_view )
+                this.set_initial_error_view( param.initial_error_view );
             if( param.on_validate )
                 this.set_on_validate( param.on_validate );
+            if( param.on_success )
+                this.set_on_success( param.on_success );
+            if( param.on_error )
+                this.set_on_error( param.on_error );
 
             this.set_event();
             this.validate_all();
@@ -241,8 +250,14 @@
         'set_messages': function( messages ) {
             this.model.set_messages( messages );
         },
+        'set_error_class': function( error_class ) {
+            this.error_class = error_class;
+        },
         'set_valid_class': function( valid_class ) {
             this.valid_class = valid_class;
+        },
+        'set_initial_error_view': function( initial_error_view ) {
+            this.initial_error_view = initial_error_view;
         },
         'set_on_validate': function( func ) {
             if( $.isFunction( func ) )
@@ -292,6 +307,7 @@
                 if(! rules ) {
                     return;
                 }
+                var sub_target_rules = [];
 
                 var target = that.model.target[ key ];
                 var flag   = true;
@@ -302,7 +318,11 @@
                 if( target.length ) {
                     if( $.isArray( rules ) ) {
                         $.each( rules, function( k ) {
-                            check = check || $.inputfollow._check_rules( rules[k] ) ? IS_VALID : IS_LIMIT;
+                            var tcheck = $.inputfollow._check_rules( rules[k] );
+                            check = check || tcheck ? IS_VALID : IS_LIMIT;
+                            if( tcheck === IS_VALID ) {
+                                sub_target_rules.push( rules[k] );
+                            }
                             if(! that.check_handler( rules[k], target ) ) {
                                 flag = false;
                                 if( error === null ) {
@@ -318,6 +338,9 @@
                     } else {
                         check = $.inputfollow._check_rules( rules );
                         flag  = that.check_handler( rules, target );
+                        if( check === IS_VALID ) {
+                            sub_target_rules.push( rules );
+                        }
                         if(
                             Object.prototype.hasOwnProperty.call( that.model.messages, key ) &&
                             Object.prototype.hasOwnProperty.call( that.model.messages[ key ], rules )
@@ -330,16 +353,34 @@
                 if( check === IS_VALID ) {
                     if( flag ) {
                         target.addClass( that.valid_class ).removeClass( that.error_class );
+
+                        // 連動入力フォームからもエラークラスを外す
+                        $.each( sub_target_rules, function( si, sv ) {
+                            var sub_targets = sv.split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 );
+                            for( var i=0, l=sub_targets.length; i<l; i++ ) {
+                                that.model.target[ sub_targets[i] ].addClass( that.valid_class ).removeClass( that.error_class );
+                            }
+                        } );
+
                         // エラーメッセージ削除
                         $( '#'+err_id ).remove();
                     } else {
                         that.model.errors ++;
                         target.removeClass( that.valid_class ).addClass( that.error_class );
+
+                        // 連動入力フォームにもエラークラスを付ける
+                        $.each( sub_target_rules, function( si, sv ) {
+                            var sub_targets = sv.split( '_and_' ).join( '_or_' ).split( '_or_' ).slice( 1 );
+                            for( var i=0, l=sub_targets.length; i<l; i++ ) {
+                                that.model.target[ sub_targets[i] ].removeClass( that.valid_class ).addClass( that.error_class );
+                            }
+                        } );
+
                         // エラーメッセージ表示
                         $( '#'+err_id ).remove();
                         if( error !== null ) {
                             that.model.error_mes += '\n'+error;
-                            if( target.data( 'is_focused' ) ) {
+                            if( target.data( 'is_focused' ) || that.initial_error_view ) {
                                 target.eq( 0 ).after( $( '<span>', { 'id': err_id, 'class': 'inputfollow-error' } ).text( error ) );
                             }
                         }
