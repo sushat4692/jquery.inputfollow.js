@@ -30,3 +30,10 @@ $( 'form' ).inputfollow( {
 ## Demo
 
 [Hear](https://sus-happy.github.io/jquery.inputfollow.js/)
+
+## Releases
+
+* 2.0.0
+  * Change to TypeScript
+  * Support array input (e.g. Checkboxes)
+  * Support separate error display

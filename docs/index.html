@@ -5,11 +5,11 @@
     <title>jquery.inputfollow.js</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="test/test.css">
+    <link rel="stylesheet" href="css/style.css">
 
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="src/jquery.inputfollow.js"></script>
-    <script src="test/test.js"></script>
+    <script src="js/jquery.inputfollow.js"></script>
+    <script src="js/script.js"></script>
 </head>
 <body>
 
@@ -24,7 +24,7 @@
                     <dd><input type="email" name="email" class="full" placeholder="Enter E-mail"></dd>
                 <dt>Input Number</dt>
                     <dd><input type="text" name="number" class="full" placeholder="Enter Number ( Limit Number )"></dd>
-                <dt>Textarea Required</dt>
+                <dt>Textarea Required <span class="caution">*</span></dt>
                     <dd><textarea name="textarea" rows="3" class="full"></textarea></dd>
                 <dt>Other Input</dt>
                     <dd><input type="text" name="other" class="full" placeholder=""></dd>
@@ -36,6 +36,13 @@
                     <dd><input type="text" name="andreq01" class="full" placeholder=""></dd>
                 <dt>Input "and required" 02 <span class="caution">*</span></dt>
                     <dd><input type="text" name="andreq02" class="full" placeholder=""></dd>
+                <dt>Check boxes <span class="caution">*</span></dt>
+                    <dd>
+                        <label><input type="checkbox" name="checkbox[]"> Checkbox01</label>
+                        <label><input type="checkbox" name="checkbox[]"> Checkbox01</label>
+                        <label><input type="checkbox" name="checkbox[]"> Checkbox01</label>
+                        <br><span class="inputfollow-error" data-target="checkbox">aaaaaaaaaaaaaaaa</span>
+                    </dd>
             </dl>
 
             <button type="submit" class="btn btn-default">Submit</button>

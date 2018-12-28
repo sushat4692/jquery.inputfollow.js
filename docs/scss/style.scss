@@ -5,6 +5,10 @@ body {
 .caution,
 .inputfollow-error {
     color: #a94442;
+
+    &.inputfollow-error-empty {
+        display: none;
+    }
 }
 
 .container {
