@@ -29,7 +29,7 @@ $( 'form' ).inputfollow( {
 
 ## Demo
 
-[Hear](https://sus-happy.github.io/jquery.inputfollow.js/)
+[Hear](https://sushat4692.github.io/jquery.inputfollow.js/)
 
 ## Releases
 
