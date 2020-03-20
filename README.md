@@ -37,3 +37,6 @@ $( 'form' ).inputfollow( {
   * Change to TypeScript
   * Support array input (e.g. Checkboxes)
   * Support separate error display
+* 2.1.0
+  * Change rules option structure
+  * Add if condition rule

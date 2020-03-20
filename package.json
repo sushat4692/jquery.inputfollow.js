@@ -1,20 +1,32 @@
 {
   "name": "jquery.inputfollow.js",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Input Validate, Input Limit etc.",
   "main": "index.js",
   "repository": "git@github.com:sus-happy/jquery.inputfollow.js.git",
   "author": "SUSH <sush@sus-happy.net>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && npm run compress && cp -f ./dist/jquery.inputfollow.js ./docs/js/jquery.inputfollow.js",
-    "watch": "tsc -w & sass docs/scss/style.scss docs/css/style.css --watch",
-    "compress": "uglifyjs ./dist/jquery.inputfollow.js -o ./dist/jquery.inputfollow.min.js -c -m --source-map"
+    "build": "webpack --mode=production && cp -f ./dist/jquery.inputfollow.js ./docs/js/jquery.inputfollow.js",
+    "watch": "webpack --mode=development --watch & sass docs/scss/style.scss docs/css/style.css --watch"
   },
   "devDependencies": {
-    "@types/jquery": "^3.3.29",
-    "sass": "^1.15.2",
-    "typescript": "^3.2.2",
-    "uglify-js": "^3.4.9"
-  }
+    "@types/jquery": "^3.3.33",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "@typescript-eslint/typescript-estree": "^2.24.0",
+    "core-js": "^3.6.4",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
+    "sass": "^1.26.3",
+    "terser-webpack-plugin": "^2.3.5",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.8.3",
+    "uglify-js": "^3.8.0",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {}
 }
