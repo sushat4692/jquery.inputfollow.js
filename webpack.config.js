@@ -19,7 +19,7 @@ module.exports = {
     filename: 'jquery.inputfollow.js'
   },
   optimization: {
-    minimize: false,
+    minimize: true,
     minimizer: [
       new TerserPlugin({
         extractComments: false,
