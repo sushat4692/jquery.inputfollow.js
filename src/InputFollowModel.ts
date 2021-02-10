@@ -69,7 +69,7 @@ export default class InputFollowModel {
           i < l;
           i += 1
         ) {
-          const targetRule = this.rules[key][i]
+          const targetRule = (this.rules[key] as RuleOption[])[i]!
           this.reset_rule(targetRule, parent)
         }
       } else {
@@ -81,7 +81,7 @@ export default class InputFollowModel {
 
   reset_rule(targetRule: RuleOption, parent: JQuery) {
     if (Array.isArray(targetRule.with)) {
-      targetRule.with.map(target => {
+      targetRule.with.map((target) => {
         this.target[target] = this.initialize_target(
           this.filter_target(target),
           parent
@@ -89,7 +89,7 @@ export default class InputFollowModel {
       })
     }
     if (targetRule.if) {
-      Object.keys(targetRule.if).map(target => {
+      Object.keys(targetRule.if).map((target) => {
         this.target[target] = this.initialize_target(
           this.filter_target(target),
           parent
@@ -105,12 +105,9 @@ export default class InputFollowModel {
   }
 
   filter_target(key: string): JQuery {
-    return this.wrap
-      .find('input,select,textarea')
-      .filter((index: number, element: Element): boolean => {
-        const pattern = new RegExp('^' + key + '\\[?', 'i')
-        return pattern.test(element.getAttribute('name') || '')
-      })
+    return this.wrap.find(
+      `input[name="${key}"],input[name^="${key}["],select[name="${key}"],select[name^="${key}["],textarea[name="${key}"],textarea[name^="${key}["]`
+    )
   }
 
   initialize_target(target: JQuery, parent: JQuery | null = null): JQuery {

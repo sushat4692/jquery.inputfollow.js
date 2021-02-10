@@ -9,7 +9,7 @@ export default class InputFollow {
     required: IS_VALID,
     email: IS_VALID,
     number: IS_LIMIT,
-    code: IS_LIMIT
+    code: IS_LIMIT,
   }
 
   get_index(): number {
@@ -21,16 +21,12 @@ export default class InputFollow {
   push_collection(index: number, method: InputFollowMethod) {
     this.collection[index] = method
   }
-  get_collection(index: number): InputFollowMethod {
+  get_collection(index: number): InputFollowMethod | undefined {
     return this.collection[index]
   }
 
   check_rules(rule: RuleOption): boolean {
-    if (this.rules.hasOwnProperty(rule.type)) {
-      return this.rules[rule.type]
-    }
-
-    return false
+    return this.rules[rule.type] ?? false
   }
 
   get_method(key: string): any {
@@ -77,7 +73,7 @@ export default class InputFollow {
     const org: string = val
 
     // Full width to Half width characters
-    val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s =>
+    val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) =>
       String.fromCharCode(s.charCodeAt(0) - 0xfee0)
     )
 
@@ -100,7 +96,7 @@ export default class InputFollow {
     const org: string = val
 
     // Full width to Half width characters
-    val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s =>
+    val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) =>
       String.fromCharCode(s.charCodeAt(0) - 0xfee0)
     )
 
@@ -162,10 +158,6 @@ export default class InputFollow {
   }
 
   split_related_rules(rule: string): string[] {
-    return rule
-      .split('_and_')
-      .join('_or_')
-      .split('_or_')
-      .slice(1)
+    return rule.split('_and_').join('_or_').split('_or_').slice(1)
   }
 }

@@ -22,12 +22,12 @@ export default class InputFollowMethod {
       this.validate_all()
 
       if (this.model.get_errors() <= 0) {
-        if ($.isFunction(this.on_success)) {
+        if (typeof this.on_success === 'function') {
           this.on_success()
         }
         return true
       } else {
-        if ($.isFunction(this.on_error)) {
+        if (typeof this.on_error === 'function') {
           this.on_error(this.model.get_error_mes())
         }
         return false
@@ -89,19 +89,19 @@ export default class InputFollowMethod {
   }
 
   set_on_validate(func: Function) {
-    if ($.isFunction(func)) {
+    if (typeof func === 'function') {
       this.on_validate = func
     }
   }
 
   set_on_success(func: Function) {
-    if ($.isFunction(func)) {
+    if (typeof func === 'function') {
       this.on_success = func
     }
   }
 
   set_on_error(func: Function) {
-    if ($.isFunction(func)) {
+    if (typeof func === 'function') {
       this.on_error = func
     }
   }
@@ -112,7 +112,7 @@ export default class InputFollowMethod {
       .get_wrap()
       .find('input,select,textarea')
       .off('keydown.inputfollow')
-      .on('keydown.inputfollow', function() {
+      .on('keydown.inputfollow', function () {
         that.validate_before($(this))
       })
       .off(
@@ -120,7 +120,7 @@ export default class InputFollowMethod {
       )
       .on(
         'click.inputfollow focus.inputfollow change.inputfollow keyup.inputfollow',
-        function() {
+        function () {
           that.validate($(this))
         }
       )
@@ -177,7 +177,7 @@ export default class InputFollowMethod {
 
       if (target.length) {
         if (Array.isArray(rule)) {
-          rule.map(r => {
+          rule.map((r) => {
             var tcheck = inputFollow.check_rules(r)
             check = check || tcheck ? IS_VALID : IS_LIMIT
 
@@ -194,12 +194,12 @@ export default class InputFollowMethod {
                   Object.prototype.hasOwnProperty.call(messages, key) &&
                   Object.prototype.hasOwnProperty.call(messages[key], r.type)
                 ) {
-                  error = messages[key][r.type]
+                  error = messages[key]![r.type]
                 }
               }
             }
           })
-        } else {
+        } else if (rule) {
           check = inputFollow.check_rules(rule)
           flag = this.check_handler(rule, target)
 
@@ -212,7 +212,7 @@ export default class InputFollowMethod {
             Object.prototype.hasOwnProperty.call(messages, key) &&
             Object.prototype.hasOwnProperty.call(messages[key], rule.type)
           ) {
-            error = messages[key][rule.type]
+            error = messages[key]![rule.type]
           }
         }
       }
@@ -253,7 +253,7 @@ export default class InputFollowMethod {
                 target.eq(0).after(
                   $('<span>', {
                     id: err_id,
-                    class: 'inputfollow-error'
+                    class: 'inputfollow-error',
                   }).text(error)
                 )
               }
@@ -265,7 +265,7 @@ export default class InputFollowMethod {
       }
     })
 
-    if ($.isFunction(this.on_validate)) {
+    if (typeof this.on_validate === 'function') {
       this.on_validate()
     }
   }
@@ -282,33 +282,33 @@ export default class InputFollowMethod {
       target.removeClass(this.valid_class).addClass(this.error_class)
     }
 
-    sub_target_rules.map(sv => {
+    sub_target_rules.map((sv) => {
       if (Array.isArray(sv.with)) {
-        sv.with.map(stv => {
-          if (targets[stv]) {
+        sv.with.map((stv) => {
+          if (Object.prototype.hasOwnProperty.call(targets, stv)) {
             if (flag) {
-              targets[stv]
-                .addClass(this.valid_class)
-                .removeClass(this.error_class)
+              targets[stv]!.addClass(this.valid_class).removeClass(
+                this.error_class
+              )
             } else {
-              targets[stv]
-                .removeClass(this.valid_class)
-                .addClass(this.error_class)
+              targets[stv]!.removeClass(this.valid_class).addClass(
+                this.error_class
+              )
             }
           }
         })
       }
       if (sv.if) {
-        Object.keys(sv.if).map(stv => {
-          if (targets[stv]) {
+        Object.keys(sv.if).map((stv) => {
+          if (Object.prototype.hasOwnProperty.call(targets, stv)) {
             if (flag) {
-              targets[stv]
-                .addClass(this.valid_class)
-                .removeClass(this.error_class)
+              targets[stv]!.addClass(this.valid_class).removeClass(
+                this.error_class
+              )
             } else {
-              targets[stv]
-                .removeClass(this.valid_class)
-                .addClass(this.error_class)
+              targets[stv]!.removeClass(this.valid_class).addClass(
+                this.error_class
+              )
             }
           }
         })
@@ -331,7 +331,7 @@ export default class InputFollowMethod {
     if (rule.if) {
       let flag = true
 
-      Object.keys(rule.if).map(target => {
+      Object.keys(rule.if).map((target) => {
         if (
           !rule.if ||
           !Object.prototype.hasOwnProperty.call(rule.if, target)
@@ -341,12 +341,12 @@ export default class InputFollowMethod {
 
         const value = rule.if[target]
         if (targets.hasOwnProperty(target)) {
-          const t = targets[target]
+          const t = targets[target]!
           let compare
           if (t.is('[type="radio"]') || t.is('[type="checkbox"]')) {
             compare = t.filter(':checked').val()
           } else {
-            compare = targets[target].val()
+            compare = targets[target]!.val()
           }
           if (compare == value) {
             flag = false
@@ -367,7 +367,7 @@ export default class InputFollowMethod {
       if (rule.mode.toLowerCase() === 'or') {
         let flag = handler(target)
 
-        rule.with.map(t => {
+        rule.with.map((t) => {
           if (targets.hasOwnProperty(t)) {
             flag = flag || handler(targets[t])
           }
@@ -377,7 +377,7 @@ export default class InputFollowMethod {
       } else if (rule.mode.toLowerCase() === 'and') {
         let flag = handler(target)
 
-        rule.with.map(t => {
+        rule.with.map((t) => {
           if (targets.hasOwnProperty(t)) {
             flag = flag && handler(targets[t])
           }
