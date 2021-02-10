@@ -1,5 +1,5 @@
 /*!
-  jquery.inputfollow.js v2.1.0
+  jquery.inputfollow.js v2.1.1
   https://github.com/sushat4692/jquery.inputfollow.js#readme
   Released under the MIT License.
 */

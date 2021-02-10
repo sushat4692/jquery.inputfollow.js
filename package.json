@@ -1,6 +1,6 @@
 {
   "name": "@sushat4692/jquery.inputfollow.js",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Input Validate, Input Limit etc.",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
