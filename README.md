@@ -1,3 +1,5 @@
+# This project is deprecated, please use [inputfollow.js](https://github.com/sushat4692/inputfollow.js).
+
 # jquery.inputfollow.js
 
 Input Validate, Input Limit etc.
